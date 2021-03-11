@@ -85,7 +85,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             # Now let's analyze the enemy base to see where their defenses are concentrated.
             # If they have many units in the front we can build a line for our demolishers to attack them at long range.
             if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
-                # self.demolisher_line_strategy(game_state)
+                self.demolisher_line_strategy(game_state)
             else:
                 # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
 
