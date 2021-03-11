@@ -79,14 +79,21 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_reactive_defense(game_state)
 
         # If the turn is less than 5, stall with interceptors and wait to see enemy's base
-        if game_state.turn_number < 5:
-            self.stall_with_interceptors(game_state)
-        else:
-            if game_state.turn_number % 2 == 1:
-                # To simplify we will just check sending them from back left and right
-                scout_spawn_location_options = [[13, 0], [14, 0]]
+        # if game_state.turn_number 5:
+        #     self.stall_with_interceptors(game_state)
+        # else:
+        if game_state.turn_number % 2 == 1:
+            # To simplify we will just check sending them from back left and right
+            if game_state.get_resource(MP) > 7:
+                scout_spawn_location_options = [[15, 1], [12, 1]]
+                best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
+                game_state.attempt_spawn(SCOUT, best_location, 6)
+                game_state.attempt_spawn(DEMOLISHER, [15, 1], 1000)
+            else:
+                scout_spawn_location_options = [[15, 1], [12, 1]]
                 best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
                 game_state.attempt_spawn(SCOUT, best_location, 1000)
+
             # Now let's analyze the enemy base to see where their defenses are concentrated.
             # If they have many units in the front we can build a line for our demolishers to attack them at long range.
             # if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
