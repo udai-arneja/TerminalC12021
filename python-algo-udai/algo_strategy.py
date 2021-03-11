@@ -82,32 +82,19 @@ class AlgoStrategy(gamelib.AlgoCore):
         # if game_state.turn_number 5:
         #     self.stall_with_interceptors(game_state)
         # else:
-        if game_state.turn_number % 2 == 1:
+        if game_state.turn_number % 4 == 1:
+            self.attack_strategy(game_state)
             # To simplify we will just check sending them from back left and right
-            if game_state.get_resource(MP) > 7:
-                scout_spawn_location_options = [[15, 1], [12, 1]]
-                best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
-                game_state.attempt_spawn(SCOUT, best_location, )
-                game_state.attempt_spawn(DEMOLISHER, [15, 1], 1000)
-            else:
-                scout_spawn_location_options = [[15, 1], [12, 1]]
-                best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
-                game_state.attempt_spawn(SCOUT, best_location, 1000)
-
-            # Now let's analyze the enemy base to see where their defenses are concentrated.
-            # If they have many units in the front we can build a line for our demolishers to attack them at long range.
-            # if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
-            #     self.demolisher_line_strategy(game_state)
+            # if game_state.get_resource(MP) > 7:
+            #     scout_spawn_location_options = [[15, 1], [12, 1]]
+            #     best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
+            #     game_state.attempt_spawn(SCOUT, best_location, )
+            #     game_state.attempt_spawn(DEMOLISHER, [15, 1], 1000)
             # else:
-            #     # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
-            #
-            #     # Only spawn Scouts every other turn
-            #     # Sending more at once is better since attacks can only hit a single scout at a time
-            #
-            #
-            #     # Lastly, if we have spare SP, let's build some Factories to generate more resources
-            #     support_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
-            #     game_state.attempt_spawn(SUPPORT, support_locations)
+            #     scout_spawn_location_options = [[15, 1], [12, 1]]
+            #     best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
+            #     game_state.attempt_spawn(SCOUT, best_location, 1000)
+
 
     def build_defences(self, game_state):
         """
@@ -138,7 +125,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         for location in self.scored_on_locations:
             # Build turret one space above so that it doesn't block our own edge spawn locations
             build_wall_location = [location[0], location[1]]
-            game_state.attempt_spawn(WALL, build_wall_location)
+            if [27, 13] != build_wall_location:
+                game_state.attempt_spawn(WALL, build_wall_location)
             if location[0]<13:
                 build_wall_location = [location[0]+1, location[1]-1]
                 game_state.attempt_spawn(WALL, build_wall_location)
@@ -146,11 +134,11 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(WALL, build_wall_location)
             if location[0]>14:
                 build_wall_location = [location[0]+1, location[1]+1]
-                game_state.attempt_spawn(WALL, build_wall_location)
+                if [27, 13] != build_wall_location:
+                    game_state.attempt_spawn(WALL, build_wall_location)
                 build_wall_location = [location[0]-1, location[1]-1]
-                game_state.attempt_spawn(WALL, build_wall_location)
-            build_location = [location[0], location[1]+1]
-            game_state.attempt_spawn(TURRET, build_location)
+                if [27, 13] != build_wall_location:
+                    game_state.attempt_spawn(WALL, build_wall_location)
 
 
     def stall_with_interceptors(self, game_state):
@@ -196,7 +184,19 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # Now spawn demolishers next to the line
         # By asking attempt_spawn to spawn 1000 units, it will essentially spawn as many as we have resources for
-        game_state.attempt_spawn(DEMOLISHER, [24, 10], 1000)
+        game_state.attempt_spawn(DEMOLISHER, [27, 13], 1000)
+
+    def attack_strategy(self, game_state):
+        """
+        Test Attack Strat One
+        """
+        # if (ticker%2==0):
+        if game_state.get_resource(MP) <10:
+            game_state.attempt_spawn(DEMOLISHER, [27, 13], 2)
+            game_state.attempt_spawn(SCOUT, [13, 0], 1000)
+        elif game_state.get_resource(MP) < 20:
+            game_state.attempt_spawn(DEMOLISHER, [27, 13], 3)
+            game_state.attempt_spawn(SCOUT, [13, 0], 1000)
 
     def least_damage_spawn_location(self, game_state, location_options):
         """
