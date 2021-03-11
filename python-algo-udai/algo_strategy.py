@@ -126,6 +126,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         wall_locations = [[21, 11], [20, 10],[19, 9],[18, 8],[17, 7],[16, 6],[15, 5],[12, 5],[10, 7],[11, 6],[9, 8],[8, 9],[7, 10],[6, 11]]
         game_state.attempt_spawn(WALL, wall_locations)
         # upgrade walls so they soak more damage
+        game_state.attempt_upgrade(turret_locations)
         game_state.attempt_upgrade(wall_locations)
 
     def build_reactive_defense(self, game_state):
@@ -136,8 +137,18 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         for location in self.scored_on_locations:
             # Build turret one space above so that it doesn't block our own edge spawn locations
-            build_wall_location = [location[0], 12]
+            build_wall_location = [location[0], location[1]]
             game_state.attempt_spawn(WALL, build_wall_location)
+            if location[0]<13:
+                build_wall_location = [location[0]+1, location[1]-1]
+                game_state.attempt_spawn(WALL, build_wall_location)
+                build_wall_location = [location[0]-1, location[1]+1]
+                game_state.attempt_spawn(WALL, build_wall_location)
+            if location[0]>14:
+                build_wall_location = [location[0]+1, location[1]+1]
+                game_state.attempt_spawn(WALL, build_wall_location)
+                build_wall_location = [location[0]-1, location[1]-1]
+                game_state.attempt_spawn(WALL, build_wall_location)
             build_location = [location[0], location[1]+1]
             game_state.attempt_spawn(TURRET, build_location)
 
