@@ -87,7 +87,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             if game_state.get_resource(MP) > 7:
                 scout_spawn_location_options = [[15, 1], [12, 1]]
                 best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
-                game_state.attempt_spawn(SCOUT, best_location, 6)
+                game_state.attempt_spawn(SCOUT, best_location, )
                 game_state.attempt_spawn(DEMOLISHER, [15, 1], 1000)
             else:
                 scout_spawn_location_options = [[15, 1], [12, 1]]
@@ -136,8 +136,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         for location in self.scored_on_locations:
             # Build turret one space above so that it doesn't block our own edge spawn locations
+            build_wall_location = [location[0], 12]
+            game_state.attempt_spawn(WALL, build_wall_location)
             build_location = [location[0], location[1]+1]
             game_state.attempt_spawn(TURRET, build_location)
+
 
     def stall_with_interceptors(self, game_state):
         """
