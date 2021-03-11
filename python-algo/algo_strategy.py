@@ -94,6 +94,12 @@ class AlgoStrategy(gamelib.AlgoCore):
                 best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
                 game_state.attempt_spawn(SCOUT, best_location, 1000)
 
+            else:
+                if game_state.get_resource(MP) >= 2*game_state.type_cost(DEMOLISHER)[MP]:
+                    dem_spawn_location_options = [[15, 1], [12, 1]]
+                    best_location = self.least_damage_spawn_location(game_state, dem_spawn_location_options)
+                    game_state.attempt_spawn(DEMOLISHER, best_location, 1000)
+
     def build_defences(self, game_state):
         """
         Build basic defenses using hardcoded locations.
