@@ -74,31 +74,30 @@ class AlgoStrategy(gamelib.AlgoCore):
         If there are no stationary units to attack in the front, we will send Scouts to try and score quickly.
         """
         # First, place basic defenses
-        self.build_defences(game_state)
-        # Now build reactive defenses based on where the enemy scored
-        self.build_reactive_defense(game_state)
 
-        # If the turn is less than 5, stall with interceptors and wait to see enemy's base
-        if game_state.turn_number < 5:
-            self.stall_with_interceptors(game_state)
+        if game_state.turn_number == 0:
+            self.build_defensive_defences(game_state)
+            self.twodemolishers(game_state)
+
+
         else:
-            # Now let's analyze the enemy base to see where their defenses are concentrated.
-            # If they have many units in the front we can build a line for our demolishers to attack them at long rang
-                # They don't have many units in the front so lets figure out their least defended area and send Scouts there.
+            if game_state.turn_number % 3 !=0:
+                self.build_defensive_defences(game_state)
+                self.build_extra_defense(game_state)
+                game_state.attempt_remove([[19, 9], [20, 9]])
 
-                # Only spawn Scouts every other turn
-                # Sending more at once is better since attacks can only hit a single scout at a time
-            if game_state.turn_number % 2 == 1:
-                # To simplify we will just check sending them from back left and right
-                scout_spawn_location_options = [[15, 1], [12, 1]]
+
+            else:
+                dem_spawn_location_options = [[16, 2]]
+                best_location = self.least_damage_spawn_location(game_state, dem_spawn_location_options)
+                game_state.attempt_spawn(DEMOLISHER, best_location, 3)
+                scout_spawn_location_options = [[15, 1]]
                 best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
                 game_state.attempt_spawn(SCOUT, best_location, 1000)
 
-            else:
-                if game_state.get_resource(MP) >= 2*game_state.type_cost(DEMOLISHER)[MP]:
-                    dem_spawn_location_options = [[15, 1], [12, 1]]
-                    best_location = self.least_damage_spawn_location(game_state, dem_spawn_location_options)
-                    game_state.attempt_spawn(DEMOLISHER, best_location, 1000)
+
+
+
 
     def build_defences(self, game_state):
         """
@@ -119,16 +118,19 @@ class AlgoStrategy(gamelib.AlgoCore):
         # upgrade walls so they soak more damage
         game_state.attempt_upgrade(wall_locations)
 
-    def build_reactive_defense(self, game_state):
-        """
-        This function builds reactive defenses based on where the enemy scored on us from.
-        We can track where the opponent scored by looking at events in action frames
-        as shown in the on_action_frame function
-        """
-        for location in self.scored_on_locations:
-            # Build turret one space above so that it doesn't block our own edge spawn locations
-            build_location = [location[0], location[1]+1]
-            game_state.attempt_spawn(TURRET, build_location)
+    def build_extra_defense(self, game_state):
+        wall_locations = [[0, 13], [1, 13], [26, 13], [27, 13], [2, 12], [3, 12], [24, 12], [25, 12], [3, 11], [24, 11], [4, 10], [23, 10], [5, 9], [6, 9], [7, 9], [8, 9], [9, 9], [10, 9], [11, 9], [12, 9], [13, 9], [14, 9], [15, 9], [16, 9], [17, 9], [18, 9], [19, 9], [20, 9], [21, 9], [22, 9]]
+        game_state.attempt_spawn(WALL, wall_locations)
+
+        turret_locations = [[1, 12], [26, 12], [2, 11], [25, 11],[11, 8], [17, 8]]
+        game_state.attempt_spawn(TURRET, turret_locations)
+
+        extraTurrets = [[3, 10], [24, 10], [9, 8], [11, 8], [16, 8], [18, 8], [10, 3], [17, 3]]
+        game_state.attempt_spawn(TURRET, extraTurrets)
+
+        extraWalls = [[25,13],[23,11],[2,13],[4,11]]
+        game_state.attempt_spawn(WALL, extraWalls)
+
 
     def stall_with_interceptors(self, game_state):
         """
@@ -151,6 +153,26 @@ class AlgoStrategy(gamelib.AlgoCore):
             units can occupy the same space.
             """
 
+    def build_defensive_defences(self, game_state):
+            turret_locations = [[1, 12], [26, 12],[11, 8], [17, 8]]
+            # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
+            game_state.attempt_spawn(TURRET, turret_locations)
+
+            # Place walls in front of turrets to soak up damage for them
+            wall_locations = [[0, 13], [1, 13], [26, 13], [27, 13], [2, 12], [3, 12], [24, 12], [25, 12], [3, 11], [24, 11], [4, 10], [23, 10], [5, 9], [6, 9], [7, 9], [10, 9], [11, 9], [12, 9], [16, 9], [17, 9], [18, 9], [20, 9], [21, 9], [22, 9]]
+            game_state.attempt_spawn(WALL, wall_locations)
+
+
+
+    def twodemolishers(self,game_state):
+        friendly_edges = game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+
+        # Remove locations that are blocked by our own structures
+        # since we can't deploy units there.
+        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+
+        best_location = self.least_damage_spawn_location(game_state, deploy_locations)
+        game_state.attempt_spawn(DEMOLISHER, best_location, 2)
 
 
     def least_damage_spawn_location(self, game_state, location_options):
