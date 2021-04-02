@@ -153,6 +153,16 @@ class AlgoStrategy(gamelib.AlgoCore):
             units can occupy the same space.
             """
 
+    def holeattack(self, game_state):
+        wallsloc = [[0, 13], [1, 13], [2, 13], [2, 12], [3, 12], [3, 11], [4, 10], [21, 10], [5, 9], [6, 9], [7, 9], [8, 9], [9, 9], [10, 9], [11, 9], [12, 9], [13, 9], [14, 9], [15, 9], [16, 9], [17, 9], [18, 9], [19, 9], [20, 9]]
+        game_state.attempt_spawn(WALL, wallsloc)
+
+
+        turretsloc = [[24, 13], [25, 13], [23, 12], [22, 11], [25, 11], [24, 10], [23, 9], [9, 8], [10, 8], [11, 8], [16, 8], [17, 8], [18, 8], [17, 3]]
+
+        supportloc = [[19, 8], [18, 7], [17, 6], [17, 5], [17, 4]]
+
+
     def build_defensive_defences(self, game_state):
             turret_locations = [[1, 12], [26, 12],[11, 8], [17, 8]]
             # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
